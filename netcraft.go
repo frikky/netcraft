@@ -14,6 +14,20 @@ type Netcraftdata struct {
 	Ro     grequests.RequestOptions
 }
 
+type NewTakedown struct {
+	Attack                    string `json:"attack"`
+	Comment                   string `json:"comment"`
+	Region                    string `json:"region,omitempty"`
+	Brand                     string `json:"brand,omitempty"`
+	Type                      string `json:"type,omitempty"`
+	SuspectedFraudulentDomain string `json:"suspected_fraudulent_domain,omitempty"`
+	Dropsite                  string `json:"dropsite,omitempty"`
+	Evidence                  string `json:"evidence,omitempty"`
+	Password                  string `json:"password,omitempty"`
+	PhishkitFetchUrl          string `json:"phishkit_fetch_url,omitempty"`
+	PhishkitPhishUrl          string `json:"phishkit_phish_url,omitempty"`
+}
+
 type Takedown struct {
 	ID                 string `json:"id"`
 	GroupID            string `json:"group_id"`
@@ -134,4 +148,18 @@ func (netcraft *Netcraftdata) GetInfo(search map[string]string) ([]Takedown, err
 	}
 
 	return *parsedRet, err
+}
+
+// No JSON return = returns bytes instead
+func (netcraft *Netcraftdata) DoTakedown(takedown map[string]string) ([]byte, error) {
+	apiurl := fmt.Sprintf("%s/authorise.php", netcraft.Url)
+
+	netcraft.Ro.Params = takedown
+
+	ret, err := grequests.Post(apiurl, &netcraft.Ro)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return ret.Bytes(), nil
 }
